@@ -6,33 +6,51 @@
   --font-display: "Anton", sans-serif;
   --font-heading: "Space Grotesk", sans-serif;
   
-  --color-brand-purple: #8B5CF6;
-  --color-brand-dark: #0A0A0B;
-  --color-brand-surface: rgba(255, 255, 255, 0.05);
+  --color-brand-purple: #B23A3A;
+  --color-brand-dark: #FFFFFF;
+  --color-brand-surface: rgba(0, 0, 0, 0.05);
+  --color-bg-gray: #F5F5F5;
+  --color-bg-light: #FAFAFA;
+  --color-bg-silver: #E5E5E5;
 }
 
 @layer base {
   body {
-    @apply bg-brand-dark text-white font-sans antialiased;
-    background-image: 
-      radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-      url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&q=80&w=2070');
+    @apply bg-brand-dark text-slate-900 font-sans antialiased overflow-x-hidden;
+    background: #FFFFFF;
     background-attachment: fixed;
-    background-size: cover;
   }
 }
 
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.mouse-follower {
+  width: 20px;
+  height: 20px;
+  background: var(--color-brand-purple);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: none;
+  box-shadow: 0 0 15px rgba(178, 58, 58, 0.5);
+}
+
 .glass {
-  @apply bg-white/5 backdrop-blur-md border border-white/10;
+  @apply bg-black/5 backdrop-blur-md border border-black/10;
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-brand-purple;
+  @apply bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-[#B23A3A];
 }
 
 .purple-glow {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 20px rgba(178, 58, 58, 0.3);
 }
 
 /* Custom scrollbar */
@@ -45,5 +63,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+  @apply bg-black/10 rounded-full hover:bg-black/20 transition-colors;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
