@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Star
+  Star,
+  Loader2
 } from 'lucide-react';
 
 // Mock Data
@@ -448,7 +449,15 @@ export default function App() {
               </div>
               
               <div className="w-full max-w-[800px] aspect-video mx-auto glass rounded-3xl overflow-hidden relative bg-black shadow-2xl group">
-                {!isPlaying ? (
+                {/* Background Pre-loader / Iframe */}
+                <iframe 
+                  src={selectedGame.url} 
+                  className={`absolute inset-0 w-full h-full border-none z-10 transition-opacity duration-500 ${isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                  title={selectedGame.title}
+                  allowFullScreen
+                />
+
+                {!isPlaying && (
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
                     <img 
                       src={selectedGame.image} 
@@ -459,24 +468,20 @@ export default function App() {
                       <motion.div 
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="w-24 h-24 bg-brand-purple rounded-full flex items-center justify-center purple-glow cursor-pointer hover:scale-110 transition-transform"
+                        className="w-24 h-24 bg-brand-purple rounded-full flex items-center justify-center purple-glow cursor-pointer hover:scale-110 transition-transform group/play"
                         onClick={() => setIsPlaying(true)}
                       >
                         <Play fill="currentColor" size={40} className="ml-2 text-white" />
                       </motion.div>
                       <div className="text-center space-y-2">
                         <h2 className="text-2xl font-bold text-white uppercase tracking-widest">{selectedGame.title}</h2>
-                        <p className="text-white/60 text-sm">Click to start the game</p>
+                        <p className="text-white/60 text-sm flex items-center gap-2 justify-center">
+                          <Loader2 size={16} className="animate-spin" />
+                          Pre-loading for instant play...
+                        </p>
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <iframe 
-                    src={selectedGame.url} 
-                    className="absolute inset-0 w-full h-full border-none z-10"
-                    title={selectedGame.title}
-                    allowFullScreen
-                  />
                 )}
               </div>
             </div>
