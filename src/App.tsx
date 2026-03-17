@@ -299,6 +299,28 @@ export default function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Adsterra Popunder Logic - Optimized for Performance and SEO
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      // Check if already loaded in this session to stay SEO safe and user friendly
+      if (!sessionStorage.getItem('ad_popunder_loaded')) {
+        const script = document.createElement('script');
+        script.src = "https://pl28935333.effectivegatecpm.com/56/b7/2e/56b72efcad1d279b754409aa856f7ac9.js";
+        script.async = true;
+        // Append to body to ensure it's at the end
+        document.body.appendChild(script);
+        
+        // Mark as loaded for this session
+        sessionStorage.setItem('ad_popunder_loaded', 'true');
+      }
+    };
+
+    // Listen for any click on the window to trigger the popunder
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    
+    return () => window.removeEventListener('click', handleFirstInteraction);
+  }, []);
+
   useEffect(() => {
     if (selectedGame) {
       setIsPlaying(false); // Reset play state when changing games
