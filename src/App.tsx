@@ -904,29 +904,25 @@ export default function App() {
                     <h3 className="font-bold text-lg uppercase tracking-widest text-slate-700">Trending Now</h3>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-3">
-                    {GAMES.slice(0, 3).map((game) => (
-                      <div 
+                  <div className="grid grid-cols-3 gap-3">
+                    {GAMES.slice(0, 12).map((game) => (
+                      <motion.div 
                         key={game.id}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedGame(game)}
-                        className="glass p-3 rounded-xl flex items-center gap-4 cursor-pointer group hover:bg-white/10 transition-all border border-white/5 hover:border-brand-purple/30"
+                        className="aspect-square rounded-xl overflow-hidden cursor-pointer group relative border border-black/5 hover:border-brand-purple/50 transition-all shadow-sm bg-white"
                       >
-                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                          <img 
-                            src={game.image} 
-                            alt={game.title} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                            referrerPolicy="no-referrer"
-                          />
+                        <img 
+                          src={game.image} 
+                          alt={game.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-brand-purple/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play size={20} className="text-white fill-white drop-shadow-lg" />
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-sm truncate group-hover:text-brand-purple transition-colors text-slate-900">{game.title}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Star size={10} className="text-yellow-400 fill-yellow-400" />
-                            <span className="text-[10px] text-slate-500">{game.rating}</span>
-                          </div>
-                        </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                   
