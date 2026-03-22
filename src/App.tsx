@@ -286,7 +286,9 @@ const NAV_TABS = ["Home", "Action", "Multiplayer", "Sports", "Shooter", "Drawing
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Home");
+  const [activePage, setActivePage] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -295,9 +297,18 @@ export default function App() {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isCategoriesOpen && !(e.target as HTMLElement).closest('.categories-dropdown-container')) {
+        setIsCategoriesOpen(false);
+      }
+    };
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCategoriesOpen]);
 
   // Adsterra Popunder Logic - Optimized for Performance and SEO
   useEffect(() => {
@@ -343,6 +354,7 @@ export default function App() {
     setSelectedGame(null);
     setIsPlaying(false);
     setActiveTab("Home");
+    setActivePage(null);
   };
 
   return (
@@ -370,24 +382,60 @@ export default function App() {
         </div>
 
         {/* Center: Navigation (Hidden on mobile) */}
-        <div className="hidden md:flex items-center bg-black/5 rounded-xl p-1 border border-black/5">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[30vw] lg:max-w-[40vw] xl:max-w-none">
-            {NAV_TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setSelectedGame(null);
-                }}
-                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
-                  activeTab === tab && !selectedGame 
-                    ? "bg-brand-purple text-white shadow-lg shadow-brand-purple/20" 
-                    : "text-slate-500 hover:text-slate-900 hover:bg-black/5"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+        <div className="hidden md:flex items-center gap-4">
+          <button
+            onClick={handleLogoClick}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+              activeTab === "Home" && !selectedGame 
+                ? "bg-brand-purple text-white shadow-lg shadow-brand-purple/20" 
+                : "text-slate-500 hover:text-slate-900 hover:bg-black/5"
+            }`}
+          >
+            Home
+          </button>
+
+          <div className="relative categories-dropdown-container">
+            <button
+              onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${
+                isCategoriesOpen || (activeTab !== "Home" && !selectedGame)
+                  ? "bg-brand-purple text-white shadow-lg shadow-brand-purple/20" 
+                  : "text-slate-500 hover:text-slate-900 hover:bg-black/5"
+              }`}
+            >
+              Categories <ChevronRight size={14} className={`transition-transform duration-300 ${isCategoriesOpen ? 'rotate-90' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {isCategoriesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-full left-0 mt-2 w-64 glass rounded-2xl p-4 shadow-2xl border border-black/5 z-[60]"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    {NAV_TABS.filter(tab => tab !== "Home").map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => {
+                          setActiveTab(tab);
+                          setSelectedGame(null);
+                          setIsCategoriesOpen(false);
+                        }}
+                        className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-left ${
+                          activeTab === tab && !selectedGame 
+                            ? "bg-brand-purple/10 text-brand-purple" 
+                            : "text-slate-500 hover:bg-black/5 hover:text-slate-900"
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -439,6 +487,24 @@ export default function App() {
                   {tab}
                 </button>
               ))}
+              <div className="h-px bg-black/5 mx-4 my-2" />
+              {["Contact Us", "Privacy Policy", "Terms of Service"].map((page) => (
+                <button
+                  key={page}
+                  className={`text-left py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${
+                    activePage === page 
+                      ? "bg-brand-purple text-white shadow-lg" 
+                      : "text-slate-400 hover:text-slate-900 hover:bg-black/5"
+                  }`}
+                  onClick={() => {
+                    setActivePage(page);
+                    setSelectedGame(null);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  {page}
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
@@ -446,8 +512,78 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-4 relative z-10">
-        
-        {selectedGame ? (
+        {activePage ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-4xl mx-auto glass rounded-3xl p-8 md:p-12 space-y-12"
+          >
+            <div className="flex items-center justify-between">
+              <h1 className="text-4xl md:text-5xl font-display uppercase tracking-tight text-gradient">
+                {activePage}
+              </h1>
+              <button 
+                onClick={() => setActivePage(null)}
+                className="p-3 glass rounded-2xl hover:bg-black/5 transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="prose prose-slate max-w-none text-slate-600 space-y-8">
+              {activePage === "Contact Us" && (
+                <div className="space-y-6">
+                  <p className="text-lg">Have questions or feedback? We'd love to hear from you! Reach out to our team using the information below.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="glass p-6 rounded-2xl space-y-2">
+                      <h3 className="font-bold text-slate-900">Email Support</h3>
+                      <p className="text-brand-purple">support@unblockedgames76.com</p>
+                    </div>
+                    <div className="glass p-6 rounded-2xl space-y-2">
+                      <h3 className="font-bold text-slate-900">Business Inquiries</h3>
+                      <p className="text-brand-purple">business@unblockedgames76.com</p>
+                    </div>
+                  </div>
+                  <div className="glass p-8 rounded-3xl space-y-6">
+                    <h3 className="text-xl font-bold text-slate-900">Send us a Message</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input type="text" placeholder="Your Name" className="bg-black/5 border border-black/10 rounded-xl px-4 py-3 outline-none focus:border-brand-purple/50" />
+                      <input type="email" placeholder="Your Email" className="bg-black/5 border border-black/10 rounded-xl px-4 py-3 outline-none focus:border-brand-purple/50" />
+                    </div>
+                    <textarea placeholder="Your Message" rows={4} className="w-full bg-black/5 border border-black/10 rounded-xl px-4 py-3 outline-none focus:border-brand-purple/50 resize-none"></textarea>
+                    <button className="w-full py-4 bg-brand-purple text-white font-bold rounded-xl shadow-lg shadow-brand-purple/20 hover:brightness-110 transition-all">
+                      Send Message
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activePage === "Privacy Policy" && (
+                <div className="space-y-6">
+                  <p>At Unblocked Games 76, we take your privacy seriously. This policy describes how we collect, use, and protect your information.</p>
+                  <h3 className="text-xl font-bold text-slate-900">1. Information Collection</h3>
+                  <p>We do not require user accounts to play games. We may collect anonymous usage data to improve our platform performance and user experience.</p>
+                  <h3 className="text-xl font-bold text-slate-900">2. Cookies</h3>
+                  <p>We use cookies to remember your game progress and preferences. These are stored locally on your device.</p>
+                  <h3 className="text-xl font-bold text-slate-900">3. Third-Party Services</h3>
+                  <p>Our games are provided by various developers and may contain their own tracking or advertising scripts. We encourage you to review their respective privacy policies.</p>
+                </div>
+              )}
+
+              {activePage === "Terms of Service" && (
+                <div className="space-y-6">
+                  <p>By using Unblocked Games 76, you agree to the following terms and conditions.</p>
+                  <h3 className="text-xl font-bold text-slate-900">1. Usage</h3>
+                  <p>Our platform is intended for entertainment purposes only. You agree to use the site responsibly and in accordance with local laws.</p>
+                  <h3 className="text-xl font-bold text-slate-900">2. Content</h3>
+                  <p>All games and media on this site are the property of their respective owners. We do not claim ownership of third-party content.</p>
+                  <h3 className="text-xl font-bold text-slate-900">3. Disclaimer</h3>
+                  <p>The site is provided "as is" without warranties of any kind. We are not responsible for any issues arising from the use of our platform.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ) : selectedGame ? (
           <div className="space-y-8">
             {/* Game Player Section */}
             <div className="space-y-4">
@@ -1097,10 +1233,37 @@ export default function App() {
           <div>
             <h4 className="font-bold mb-6">Support</h4>
             <ul className="space-y-3 text-sm text-slate-500">
-              <li className="hover:text-brand-purple cursor-pointer transition-colors">Contact Us</li>
+              <li 
+                onClick={() => {
+                  setActivePage("Contact Us");
+                  setSelectedGame(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="hover:text-brand-purple cursor-pointer transition-colors"
+              >
+                Contact Us
+              </li>
               <li className="hover:text-brand-purple cursor-pointer transition-colors">FAQ</li>
-              <li className="hover:text-brand-purple cursor-pointer transition-colors">Privacy Policy</li>
-              <li className="hover:text-brand-purple cursor-pointer transition-colors">Terms of Service</li>
+              <li 
+                onClick={() => {
+                  setActivePage("Privacy Policy");
+                  setSelectedGame(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="hover:text-brand-purple cursor-pointer transition-colors"
+              >
+                Privacy Policy
+              </li>
+              <li 
+                onClick={() => {
+                  setActivePage("Terms of Service");
+                  setSelectedGame(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="hover:text-brand-purple cursor-pointer transition-colors"
+              >
+                Terms of Service
+              </li>
             </ul>
           </div>
 
